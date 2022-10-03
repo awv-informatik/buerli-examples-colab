@@ -1,0 +1,35 @@
+{
+  "name": "object-gizmo-controls",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [],
+  "main": "src/index.js",
+  "dependencies": {
+    "@liveblocks/client": "0.18.2",
+    "@liveblocks/zustand": "0.18.2",
+    "@react-three/drei": "9.32.0",
+    "@react-three/fiber": "8.8.2",
+    "@types/three": "0.144.0",
+    "antd": "4.23.3",
+    "maath": "0.4.2",
+    "random-name": "0.1.2",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-scripts": "5.0.1",
+    "three": "0.144.0",
+    "uuid": "9.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
+}
