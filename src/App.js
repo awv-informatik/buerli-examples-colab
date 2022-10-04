@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { useRef, useEffect, useState, useLayoutEffect, memo } from 'react'
+import { useRef, useEffect, useState, memo } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { PivotControls, OrbitControls, Html } from '@react-three/drei'
 import { Room, useStore } from './liveblocks'
@@ -17,14 +17,16 @@ export default function App() {
         <directionalLight position={[10, 10, 5]} intensity={1.5} />
         <Shape name="box">
           <boxGeometry />
+          <Annotations />
         </Shape>
         <Shape name="sphere" position={[4, 0, 0]}>
           <sphereGeometry args={[0.5]} />
+          <Annotations />
         </Shape>
         <OrbitControls makeDefault />
-        <Annotations />
         <Cursor />
         <Others />
+        <Annotations global />
       </Canvas>
     </>
   )
@@ -39,6 +41,7 @@ function Cursor() {
   const setCursor = useStore((state) => state.setCursor)
   const addAnnotation = useStore((state) => state.addAnnotation)
   const lastVec = useRef([0, 0, 0])
+  const lastVecLocal = useRef([0, 0, 0])
   useEffect(() => {
     const raycaster = new THREE.Raycaster()
     const vec = new THREE.Vector3() // create once and reuse
@@ -48,10 +51,11 @@ function Cursor() {
       vec.set((e.clientX / size.width) * 2 - 1, -(e.clientY / size.height) * 2 + 1, 0)
       raycaster.setFromCamera(vec, camera)
       const intersects = raycaster.intersectObject(scene, true)
-      if (intersects.length) {
+      if (intersects.length && intersects[0].object.name) {
         const entry = intersects[0]
         setHovered(entry.object.name)
         setCursor((lastVec.current = entry.point.toArray()))
+        setCursor((lastVecLocal.current = entry.object.worldToLocal(entry.point).toArray()))
       } else {
         setHovered(null)
         vec.z = 0.5
@@ -70,7 +74,7 @@ function Cursor() {
         setText('')
         setReady(false)
       } else if (code === 'Enter') {
-        addAnnotation(v4(), lastVec.current, text, hovered)
+        addAnnotation(v4(), hovered ? lastVecLocal.current : lastVec.current, text, hovered)
         setText('')
         setReady(false)
       } else if (code === 'Backspace') {
@@ -103,21 +107,27 @@ function Cursor() {
   )
 }
 
-function Annotations() {
+function Annotations({ global }) {
+  const ref = useRef()
+  const [filter, setFilter] = useState('')
   const annotations = useStore((state) => state.annotations)
-  return annotations.map((item, index) => <Annotation key={index} {...item} />)
+  useEffect(() => {
+    setFilter(ref.current.parent.name)
+  }, [])
+  return (
+    <group ref={ref}>
+      {annotations
+        .filter((item) => (global ? !item.parent : item.parent === filter))
+        .map((item, index) => (
+          <Annotation key={index} {...item} />
+        ))}
+    </group>
+  )
 }
 
 const Annotation = memo(({ id, position, text, parent }) => {
   const ref = useRef()
   const removeAnnotation = useStore((state) => state.removeAnnotation)
-  const scene = useThree((state) => state.scene)
-  useLayoutEffect(() => {
-    if (parent) {
-      const obj = scene.getObjectByName(parent)
-      if (obj) obj.attach(ref.current)
-    }
-  }, [])
   return (
     <group ref={ref} position={position}>
       <Html className="annotation">
