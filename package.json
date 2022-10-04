@@ -5,6 +5,8 @@
   "keywords": [],
   "main": "src/index.js",
   "dependencies": {
+    "@buerli.io/headless": "0.3.0",
+    "@buerli.io/react": "0.3.0",
     "@liveblocks/client": "0.18.2",
     "@liveblocks/zustand": "0.18.2",
     "@react-three/drei": "9.32.0",
